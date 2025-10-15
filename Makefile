@@ -6,12 +6,12 @@
 #    By: adichou <adichou@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/01/09 01:30:46 by adichou           #+#    #+#              #
-#    Updated: 2025/02/06 06:23:57 by adichou          ###   ########.fr        #
+#    Updated: 2025/09/18 23:31:27 by adichou          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # Nom de l'exécutable
-NAME = fdf
+NAME = minirt
 
 # Répertoires
 SRC_DIR = src
@@ -19,17 +19,6 @@ MLX_DIR = lib/minilibx-linux
 
 # Fichiers sources et objets
 SRC = $(SRC_DIR)/main.c \
-		$(SRC_DIR)/utils.c \
-		$(SRC_DIR)/fill_tab_utils.c \
-		$(SRC_DIR)/rotate_functions.c \
-		$(SRC_DIR)/r_rotate_functions.c \
-		$(SRC_DIR)/move_functions.c \
-		$(SRC_DIR)/zoom_functions.c \
-		$(SRC_DIR)/display_functions.c \
-		$(SRC_DIR)/mlx_hook_functions.c \
-		$(SRC_DIR)/draw_line_utils.c \
-		$(SRC_DIR)/draw_line_utils_bis.c \
-		$(SRC_DIR)/draw_line_functions.c
 
 OBJ = $(SRC:.c=.o)
 

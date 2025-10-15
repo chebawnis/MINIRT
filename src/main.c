@@ -6,41 +6,61 @@
 /*   By: adichou <adichou@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 20:58:41 by adichou           #+#    #+#             */
-/*   Updated: 2025/02/10 13:20:57 by adichou          ###   ########.fr       */
+/*   Updated: 2025/10/15 19:03:51 by adichou          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/fdf.h"
 
-int	fdf(int fd, char *map)
+typedef struct s_point
 {
-	t_mlx									mlx;
+	float	x;
+	float	y;
+	float	z;
+}	t_point;
 
-	set_mlx(&mlx, fd);
-	close(fd);
-	fd = open(map, O_RDONLY);
-	if (fd < 0)
-	{
-		free(mlx.tab);
-		return (ft_putstr("Map Invalide\n"));
-	}
-	fill_tab(fd, mlx.tab, &mlx.lrg_x, &mlx.longueur_y);
-	center_tab(mlx.tab, mlx.lrg_x, mlx.longueur_y);
-	display_tab(&mlx);
-	return (0);
+typedef struct s_vector
+{
+	t_point		vector;
+	t_point		from;
+}	t_vector;
+
+typedef struct s_sphere
+{
+	float		center[3];
+	float		radius;
+}	t_sphere;
+
+typedef struct s_cylinder
+{
+	t_vector	center;
+	float		radius;
+}	t_cylinder;
+
+t_point	calcul_norm(t_vector vec_2, vec_2)
+{
+	t_point		res;
+	res
+}
+
+float	calcul_prod_scal(t_vector vec_1, t_vector vec_2)
+{
+	float	x_temp;
+	float	y_temp;
+	float	z_temp;
+
+	x_temp = vec_1.from.x * vec_2.from.x;
+	y_temp = vec_1.from.y * vec_2.from.y;
+	z_temp = vec_1.from.z * vec_2.from.z;
+	return (x_temp + y_temp + z_temp);
 }
 
 int	main(int argc, char **argv)
 {
-	int										fd;
-
-	if (argc > 1)
+	if (argc == 2)
 	{
-		fd = open(argv[1], O_RDONLY);
-		fdf(fd, argv[1]);
-		close(fd);
+		printf("argc est egal a 2");
+		(void)argv[1];
 	}
-	else
-		ft_putstr("mets une map en argument mgl\n");
 	return (0);
 }
