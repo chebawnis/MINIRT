@@ -6,7 +6,7 @@
 /*   By: adichou <adichou@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 20:58:41 by adichou           #+#    #+#             */
-/*   Updated: 2025/10/24 00:48:48 by adichou          ###   ########.fr       */
+/*   Updated: 2025/10/24 01:06:37 by adichou          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,7 +161,7 @@ void	get_image()
 
 }
 
-void	init_pixel_screen(float	*pixel_screen[3])
+void	init_pixel_screen(float	*pixel_screen[3], t_program program)
 {
 	int		x_index;
 	int		y_index;
@@ -172,20 +172,20 @@ void	init_pixel_screen(float	*pixel_screen[3])
 	if (!pixel_screen)
 		return ;
 	pixel_gap = 1 / RES_X;
-	start[0] = ;
-	start[1] = ;
-	start[2] = ;
-	while (x_index < RES_X)
+	start[0] = 9.5;
+	start[1] = program.camera.fov;
+	start[2] = 10 + (RES_X / RES_Y / 2);
+	while (y_index < RES_Y)
 	{
-		while (y_index < RES_Y)
+		while (x_index < RES_X)
 		{
-			y_index ++;
-			pixel_screen[y_index][0] = ;
-			pixel_screen[y_index][1] = ;
-			pixel_screen[y_index][2] = ;
+			pixel_screen[x_index][0] = start[0] + (x_index * pixel_gap);
+			pixel_screen[x_index][1] = program.camera.fov;
+			pixel_screen[x_index][2] = y_index * pixel_gap;
+			x_index ++;
 		}
-		y_index = 0;
-		x_index ++;
+		x_index = 0;
+		y_index ++;
 	}
 	
 }
@@ -197,7 +197,7 @@ int	minirt(void)
 
 	program = malloc(sizeof(t_program));
 	init_program(program);
-	init_pixel_screen(&pixel_screen);
+	init_pixel_screen(&pixel_screen, *program);
 
 	// PROGRAMME PRINCIPAL
 	
