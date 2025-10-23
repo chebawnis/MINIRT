@@ -6,7 +6,7 @@
 /*   By: adichou <adichou@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 20:58:41 by adichou           #+#    #+#             */
-/*   Updated: 2025/10/24 00:22:02 by adichou          ###   ########.fr       */
+/*   Updated: 2025/10/24 00:48:48 by adichou          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,21 +156,57 @@ void	pixelput(t_mlx mlx, int x, int y)
 	put_pixel(mlx.addr, mlx.line_length, mlx.bpp, x, y, 0xFF0000);
 }
 
+void	get_image()
+{
+
+}
+
+void	init_pixel_screen(float	*pixel_screen[3])
+{
+	int		x_index;
+	int		y_index;
+	float	pixel_gap;
+	float	start[3];
+
+	pixel_screen = malloc(RES_X * RES_Y * sizeof(float[3]));
+	if (!pixel_screen)
+		return ;
+	pixel_gap = 1 / RES_X;
+	start[0] = ;
+	start[1] = ;
+	start[2] = ;
+	while (x_index < RES_X)
+	{
+		while (y_index < RES_Y)
+		{
+			y_index ++;
+			pixel_screen[y_index][0] = ;
+			pixel_screen[y_index][1] = ;
+			pixel_screen[y_index][2] = ;
+		}
+		y_index = 0;
+		x_index ++;
+	}
+	
+}
+
 int	minirt(void)
 {
 	t_program	*program;
+	float 		(*pixel_screen)[3];
 
 	program = malloc(sizeof(t_program));
 	init_program(program);
+	init_pixel_screen(&pixel_screen);
 
 	// PROGRAMME PRINCIPAL
 	
+
 	
-	pixelput(program->mlx, 400, 400);
+	get_image();
 	mlx_put_image_to_window(program->mlx.mlx, program->mlx.win,
 							program->mlx.img, 0, 0);
-
-
+	
 
 	mlx_loop(program->mlx.mlx);
 	return (0);
