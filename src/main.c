@@ -6,7 +6,7 @@
 /*   By: adichou <adichou@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 20:58:41 by adichou           #+#    #+#             */
-/*   Updated: 2025/10/24 01:06:37 by adichou          ###   ########.fr       */
+/*   Updated: 2025/10/25 01:06:54 by adichou          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,6 +130,11 @@ t_point	create_point(float x, float y, float z)
 	return (res);
 }
 
+t_map	init_map(void)
+{
+	//faire une map en gros
+}
+
 void	init_program(t_program *program)
 {
 	program->x_size = RES_X;
@@ -141,6 +146,7 @@ void	init_program(t_program *program)
 	program->mlx.img = mlx_new_image(program->mlx.mlx, RES_X, RES_Y);
 	program->mlx.addr = mlx_get_data_addr(program->mlx.img, &(program->mlx.bpp),
 						&(program->mlx.line_length), &(program->mlx.endian));
+	program->map = init_map();
 }
 
 void	put_pixel(char *addr, int line_length, int bpp, int x, int y, int color)
@@ -151,44 +157,80 @@ void	put_pixel(char *addr, int line_length, int bpp, int x, int y, int color)
 	*(unsigned int *)pixel = color;
 }
 
-void	pixelput(t_mlx mlx, int x, int y)
+void	pixelput(t_mlx mlx, int x, int y, int color)
 {
-	put_pixel(mlx.addr, mlx.line_length, mlx.bpp, x, y, 0xFF0000);
+	put_pixel(mlx.addr, mlx.line_length, mlx.bpp, x, y, color);
 }
 
-void	get_image()
+void	print_pixel_screen(float (*pixel_screen)[3])
 {
-
-}
-
-void	init_pixel_screen(float	*pixel_screen[3], t_program program)
-{
-	int		x_index;
-	int		y_index;
-	float	pixel_gap;
-	float	start[3];
-
-	pixel_screen = malloc(RES_X * RES_Y * sizeof(float[3]));
-	if (!pixel_screen)
-		return ;
-	pixel_gap = 1 / RES_X;
-	start[0] = 9.5;
-	start[1] = program.camera.fov;
-	start[2] = 10 + (RES_X / RES_Y / 2);
-	while (y_index < RES_Y)
+	int i = 0;
+	while (i < RES_X * RES_Y && i < 10)
 	{
-		while (x_index < RES_X)
-		{
-			pixel_screen[x_index][0] = start[0] + (x_index * pixel_gap);
-			pixel_screen[x_index][1] = program.camera.fov;
-			pixel_screen[x_index][2] = y_index * pixel_gap;
-			x_index ++;
-		}
-		x_index = 0;
-		y_index ++;
+		printf("point %d;\n		X = %f\n		Y = %f\n		Z = %f\n\n\n",
+				i, pixel_screen[i][0], pixel_screen[i][1], pixel_screen[i][2]);
+		i ++;
 	}
 	
 }
+
+void	init_pixel_screen(float	(**pixel_screen)[3], t_program program)
+{
+	int		x_index;
+	int		y_index = 0;
+	int		index = 0;
+	float	pixel_gap;
+	float	start[3];
+
+	*pixel_screen = malloc(RES_X * RES_Y * sizeof(float[3]));
+	if (!*pixel_screen)
+		return ;
+	pixel_gap = 1.0f / RES_X;
+	start[0] = 9.5;
+	start[2] = 10 + ((float)RES_X / (float)RES_Y / 2);
+	while (y_index < RES_Y)
+	{
+		x_index = 0;
+		while (x_index < RES_X)
+		{
+			(*pixel_screen)[index][0] = start[0] + (x_index * pixel_gap);
+			(*pixel_screen)[index][1] = program.camera.fov;
+			(*pixel_screen)[index][2] = start[2] + (y_index * pixel_gap);
+			x_index ++;
+			index ++;
+		}
+		y_index ++;
+	}
+}
+
+int	get_pixel_color(float (**pixel_screen)[3], int i, t_program *program)
+{
+	int	res;
+
+	(void)pixel_screen;
+	(void)program;
+	if (i % 10 == 0)
+		res = 0xFF0000;
+	else
+		res = 0;
+	return (res);
+}
+
+void	get_image(float (**pixel_screen)[3], t_program *program)
+{
+	// creer des vecteurs qui passent par la camera et par les points de pixel_screen
+	// avec la fonction sub_vec()
+	int i;
+
+	i = 0;
+	while (i < RES_X * RES_Y)
+	{
+		pixelput(program->mlx, i % RES_X, i / RES_X, get_pixel_color(pixel_screen, i, program));
+		i ++;
+	}
+	
+}
+
 
 int	minirt(void)
 {
@@ -197,13 +239,14 @@ int	minirt(void)
 
 	program = malloc(sizeof(t_program));
 	init_program(program);
+	pixel_screen = NULL;
 	init_pixel_screen(&pixel_screen, *program);
-
+	print_pixel_screen(pixel_screen);
 	// PROGRAMME PRINCIPAL
 	
 
 	
-	get_image();
+	get_image(&pixel_screen, program);
 	mlx_put_image_to_window(program->mlx.mlx, program->mlx.win,
 							program->mlx.img, 0, 0);
 	

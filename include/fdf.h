@@ -6,7 +6,7 @@
 /*   By: adichou <adichou@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 21:27:34 by adichou           #+#    #+#             */
-/*   Updated: 2025/10/23 23:03:24 by adichou          ###   ########.fr       */
+/*   Updated: 2025/10/25 01:06:54 by adichou          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,10 +73,18 @@ typedef struct s_mlx
 	int			endian;
 }	t_mlx;
 
+typedef struct s_map
+{
+	t_plan		*plans;
+	t_sphere	*spheres;
+	t_cylinder	*cylinders;
+}	t_map;
+
 typedef struct s_program
 {
 	int			x_size;
 	int			y_size;
 	t_camera	camera;
 	t_mlx		mlx;
+	t_map		map;
 }	t_program;
