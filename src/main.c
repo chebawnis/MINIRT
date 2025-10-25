@@ -6,7 +6,7 @@
 /*   By: adichou <adichou@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 20:58:41 by adichou           #+#    #+#             */
-/*   Updated: 2025/10/25 01:06:54 by adichou          ###   ########.fr       */
+/*   Updated: 2025/10/25 17:54:12 by adichou          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,30 +96,6 @@ t_vector	get_vector(t_point a, t_point b)
 	return (res);
 }
 
-// int	launch_vec(vector, indice)
-// {
-	
-// 	// vecteur doit partir de camera_fov et passer par i,
-// 	//
-// 	// verifier le premier objet touche par le vecteur, noter le point de collision
-// 	// et noter la nature de l'objet,
-// 	//
-// 	// launch_vec(bounce(vector, point_collision, objet*), indice - reflexion_index)
-// 	// * "plan", "circle" ou "cylindre" (pour l'instant) 
-// }
-
-// int	lauch_map(map)
-// {
-	
-// 	while (i < total_pixel)
-// 	{
-// 		lauch_vec(get_vector(i, camera_fov));
-// 		i ++;
-// 		//passer au pixel d'apres
-// 	}
-	
-// }
-
 t_point	create_point(float x, float y, float z)
 {
 	t_point	res;
@@ -132,13 +108,19 @@ t_point	create_point(float x, float y, float z)
 
 t_map	init_map(void)
 {
-	//faire une map en gros
+	t_map	res;
+
+	res.spheres = malloc(3 * sizeof(t_sphere));
+	res.spheres[0].center = create_point(10, 20, 10);
+	res.spheres[0].radius = 10;
+	return res;
 }
 
 void	init_program(t_program *program)
 {
 	program->x_size = RES_X;
 	program->y_size = RES_Y;
+	program->camera.fov = 1;
 	program->camera.camera = create_vector(create_point(10, 0, 10),
 							create_point(10, program->camera.fov, 10));
 	program->mlx.mlx = mlx_init();
@@ -171,7 +153,13 @@ void	print_pixel_screen(float (*pixel_screen)[3])
 				i, pixel_screen[i][0], pixel_screen[i][1], pixel_screen[i][2]);
 		i ++;
 	}
-	
+}
+
+void	print_point(t_point	point, char *str)
+{
+	printf("%s X = %f\n", str, point.x);
+	printf("%s Y = %f\n", str, point.y);
+	printf("%s Z = %f\n", str, point.z);
 }
 
 void	init_pixel_screen(float	(**pixel_screen)[3], t_program program)
@@ -203,13 +191,60 @@ void	init_pixel_screen(float	(**pixel_screen)[3], t_program program)
 	}
 }
 
+int	is_vector_hitting(t_vector vector, t_map map)
+{
+	// printf("sphere center X = %f\n", map.spheres[0].center.x);
+	// printf("sphere center y = %f\n", map.spheres[0].center.y);
+	// printf("sphere center z = %f\n", map.spheres[0].center.z);
+	// printf("sphere radius = %f\n", map.spheres[0].radius);
+
+	t_sphere	sphere = map.spheres[0];
+
+	t_point o = vector.from;
+	t_point c = sphere.center;
+
+	// direction d = v - o
+	float dx = vector.vector_point.x;
+	float dy = vector.vector_point.y;
+	float dz = vector.vector_point.z;
+
+	// coefficients de l'équation
+	float a = dx*dx + dy*dy + dz*dz;
+	float ox_cx = o.x - c.x;
+	float oy_cy = o.y - c.y;
+	float oz_cz = o.z - c.z;
+	float b = 2 * (dx*ox_cx + dy*oy_cy + dz*oz_cz);
+	float c_term = ox_cx*ox_cx + oy_cy*oy_cy + oz_cz*oz_cz - sphere.radius * sphere.radius;
+
+	float delta = b*b - 4*a*c_term;
+
+	if (delta < 0)
+		return (0); // pas d’intersection
+
+	// on calcule les solutions
+	float t1 = (-b - sqrtf(delta)) / (2 * a);
+	float t2 = (-b + sqrtf(delta)) / (2 * a);
+
+	// si au moins une est >= 0, le vecteur touche la sphère
+	if (t1 >= 0 || t2 >= 0)
+		return (1);
+	return (0);
+}
+
 int	get_pixel_color(float (**pixel_screen)[3], int i, t_program *program)
 {
 	int	res;
 
 	(void)pixel_screen;
 	(void)program;
-	if (i % 10 == 0)
+
+	t_point		tmp;
+	tmp.x = (*pixel_screen)[i][0];
+	tmp.y = (*pixel_screen)[i][1];
+	tmp.z = (*pixel_screen)[i][2];
+	t_vector	vector = create_vector(program->camera.camera.from, tmp);
+
+	if (is_vector_hitting(vector, program->map))
 		res = 0xFF0000;
 	else
 		res = 0;
@@ -220,9 +255,14 @@ void	get_image(float (**pixel_screen)[3], t_program *program)
 {
 	// creer des vecteurs qui passent par la camera et par les points de pixel_screen
 	// avec la fonction sub_vec()
-	int i;
-
-	i = 0;
+	
+	printf("FOV = %f\n", program->camera.fov);
+	print_point(program->camera.camera.from, "camera from");
+	print_point(program->camera.camera.vector_point, "camera dir");
+	print_point(program->map.spheres->center, "sphere center");
+	printf("sphere radius = %f\n", program->map.spheres->radius);
+	(void)pixel_screen;
+	int i = 0;
 	while (i < RES_X * RES_Y)
 	{
 		pixelput(program->mlx, i % RES_X, i / RES_X, get_pixel_color(pixel_screen, i, program));
@@ -241,7 +281,7 @@ int	minirt(void)
 	init_program(program);
 	pixel_screen = NULL;
 	init_pixel_screen(&pixel_screen, *program);
-	print_pixel_screen(pixel_screen);
+	// print_pixel_screen(pixel_screen);
 	// PROGRAMME PRINCIPAL
 	
 

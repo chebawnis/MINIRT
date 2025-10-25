@@ -6,7 +6,7 @@
 /*   By: adichou <adichou@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 21:27:34 by adichou           #+#    #+#             */
-/*   Updated: 2025/10/25 01:06:54 by adichou          ###   ########.fr       */
+/*   Updated: 2025/10/25 17:01:12 by adichou          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ typedef struct s_vector
 
 typedef struct s_sphere
 {
-	float		center[3];
+	t_point		center;
 	float		radius;
 }	t_sphere;
 
