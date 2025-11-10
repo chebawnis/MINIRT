@@ -6,7 +6,7 @@
 /*   By: adichou <adichou@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 20:58:41 by adichou           #+#    #+#             */
-/*   Updated: 2025/10/25 17:54:12 by adichou          ###   ########.fr       */
+/*   Updated: 2025/11/10 23:58:33 by adichou          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,8 @@ t_vector	create_vector(t_point from, t_point to)
 	tmp.x = to.x - from.x;
 	tmp.y = to.y - from.y;
 	tmp.z = to.z - from.z;
-	res.vector_point = tmp;
-	res.from = from;
+	res.dir = tmp;
+	res.origin = from;
 	return (res);
 }
 
@@ -32,9 +32,9 @@ float	calcul_prod_scal(t_vector vec_1, t_vector vec_2)
 	float	y_temp;
 	float	z_temp;
 
-	x_temp = vec_1.vector_point.x * vec_2.vector_point.x;
-	y_temp = vec_1.vector_point.y * vec_2.vector_point.y;
-	z_temp = vec_1.vector_point.z * vec_2.vector_point.z;
+	x_temp = vec_1.dir.x * vec_2.dir.x;
+	y_temp = vec_1.dir.y * vec_2.dir.y;
+	z_temp = vec_1.dir.z * vec_2.dir.z;
 	return (x_temp + y_temp + z_temp);
 }
 
@@ -48,22 +48,22 @@ t_point	calcul_plan_norm(t_plan plan)
 	ac = create_vector(plan.a, plan.c);
 	// scal(res, ab) doit etre egal a 0;
 	// scal(res, ac) doit etre egal a 0;
-	res.vector_point.x = ab.vector_point.y * ac.vector_point.z - ab.vector_point.z * ac.vector_point.y;
-	res.vector_point.y = ab.vector_point.z * ac.vector_point.x - ab.vector_point.x * ac.vector_point.z;
-	res.vector_point.z = ab.vector_point.x * ac.vector_point.y - ab.vector_point.y * ac.vector_point.x;
-	res.from.x = 0;
-	res.from.y = 0;
-	res.from.z = 0;
-	return (res.vector_point);
+	res.dir.x = ab.dir.y * ac.dir.z - ab.dir.z * ac.dir.y;
+	res.dir.y = ab.dir.z * ac.dir.x - ab.dir.x * ac.dir.z;
+	res.dir.z = ab.dir.x * ac.dir.y - ab.dir.y * ac.dir.x;
+	res.origin.x = 0;
+	res.origin.y = 0;
+	res.origin.z = 0;
+	return (res.dir);
 }
 
 t_vector	sub_vec(t_vector v1, t_vector v2)
 {
 	t_vector	res;
 
-	res.vector_point.x = v1.vector_point.x - v2.vector_point.x;
-	res.vector_point.y = v1.vector_point.y - v2.vector_point.y;
-	res.vector_point.z = v1.vector_point.z - v2.vector_point.z;
+	res.dir.x = v1.dir.x - v2.dir.x;
+	res.dir.y = v1.dir.y - v2.dir.y;
+	res.dir.z = v1.dir.z - v2.dir.z;
 	return (res);
 }
 
@@ -71,9 +71,9 @@ t_vector	mult_vec(float n, t_vector v1)
 {
 	t_vector	res;
 
-	res.vector_point.x = v1.vector_point.x * n;
-	res.vector_point.y = v1.vector_point.y * n;
-	res.vector_point.z = v1.vector_point.z * n;
+	res.dir.x = v1.dir.x * n;
+	res.dir.y = v1.dir.y * n;
+	res.dir.z = v1.dir.z * n;
 	return (res);
 }
 
@@ -90,9 +90,9 @@ t_vector	get_vector(t_point a, t_point b)
 {
 	t_vector	res;
 
-	res.vector_point.x = b.x - a.x;
-	res.vector_point.y = b.y - a.y;
-	res.vector_point.z = b.z - a.z;
+	res.dir.x = b.x - a.x;
+	res.dir.y = b.y - a.y;
+	res.dir.z = b.z - a.z;
 	return (res);
 }
 
@@ -144,16 +144,16 @@ void	pixelput(t_mlx mlx, int x, int y, int color)
 	put_pixel(mlx.addr, mlx.line_length, mlx.bpp, x, y, color);
 }
 
-void	print_pixel_screen(float (*pixel_screen)[3])
-{
-	int i = 0;
-	while (i < RES_X * RES_Y && i < 10)
-	{
-		printf("point %d;\n		X = %f\n		Y = %f\n		Z = %f\n\n\n",
-				i, pixel_screen[i][0], pixel_screen[i][1], pixel_screen[i][2]);
-		i ++;
-	}
-}
+// void	print_pixel_screen(float (*pixel_screen)[3])
+// {
+// 	int i = 0;
+// 	while (i < RES_X * RES_Y && i < 10)
+// 	{
+// 		printf("point %d;\n		X = %f\n		Y = %f\n		Z = %f\n\n\n",
+// 				i, pixel_screen[i][0], pixel_screen[i][1], pixel_screen[i][2]);
+// 		i ++;
+// 	}
+// }
 
 void	print_point(t_point	point, char *str)
 {
@@ -173,9 +173,12 @@ void	init_pixel_screen(float	(**pixel_screen)[3], t_program program)
 	*pixel_screen = malloc(RES_X * RES_Y * sizeof(float[3]));
 	if (!*pixel_screen)
 		return ;
-	pixel_gap = 1.0f / RES_X;
-	start[0] = 9.5;
-	start[2] = 10 + ((float)RES_X / (float)RES_Y / 2);
+
+	pixel_gap = 1.0f / RES_X; // distance entre pixels (même pour X et Y)
+	start[0] = -0.5f; // centre horizontalement
+	start[1] = 1.0f;  // plan à y = 1
+	start[2] = -((float)RES_Y / (float)RES_X) / 2.0f; // centrer verticalement
+
 	while (y_index < RES_Y)
 	{
 		x_index = 0;
@@ -184,52 +187,48 @@ void	init_pixel_screen(float	(**pixel_screen)[3], t_program program)
 			(*pixel_screen)[index][0] = start[0] + (x_index * pixel_gap);
 			(*pixel_screen)[index][1] = program.camera.fov;
 			(*pixel_screen)[index][2] = start[2] + (y_index * pixel_gap);
-			x_index ++;
-			index ++;
+			x_index++;
+			index++;
 		}
-		y_index ++;
+		y_index++;
 	}
+}
+
+
+void	print_pixel_screen(float	(**pixel_screen)[3])
+{
+	printf("coin haut gauche, X = %f, Y = %f, Z = %f\n", (*pixel_screen)[0][0], (*pixel_screen)[0][1], (*pixel_screen)[0][2]);
+	printf("coin haut droit, X = %f, Y = %f, Z = %f\n", (*pixel_screen)[RES_X][0], (*pixel_screen)[RES_X][1], (*pixel_screen)[RES_X][2]);
+	printf("coin bas gauche, X = %f, Y = %f, Z = %f\n", (*pixel_screen)[RES_X * RES_Y - RES_X][0], (*pixel_screen)[RES_X * RES_Y - RES_X][1], (*pixel_screen)[RES_X * RES_Y - RES_X][2]);
+	printf("coin bas droit, X = %f, Y = %f, Z = %f\n", (*pixel_screen)[RES_X * RES_Y][0], (*pixel_screen)[RES_X * RES_Y][1], (*pixel_screen)[RES_X * RES_Y][2]);
 }
 
 int	is_vector_hitting(t_vector vector, t_map map)
 {
-	// printf("sphere center X = %f\n", map.spheres[0].center.x);
-	// printf("sphere center y = %f\n", map.spheres[0].center.y);
-	// printf("sphere center z = %f\n", map.spheres[0].center.z);
-	// printf("sphere radius = %f\n", map.spheres[0].radius);
-
 	t_sphere	sphere = map.spheres[0];
+	t_point		oc;
+	float		a, b, c;
+	float		discriminant;
 
-	t_point o = vector.from;
-	t_point c = sphere.center;
+	// O - C
+	oc.x = vector.origin.x - sphere.center.x;
+	oc.y = vector.origin.y - sphere.center.y;
+	oc.z = vector.origin.z - sphere.center.z;
 
-	// direction d = v - o
-	float dx = vector.vector_point.x;
-	float dy = vector.vector_point.y;
-	float dz = vector.vector_point.z;
+	// coefficients de l'équation quadratique
+	a = vector.dir.x * vector.dir.x + vector.dir.y * vector.dir.y + vector.dir.z * vector.dir.z;
+	b = 2.0f * (oc.x * vector.dir.x + oc.y * vector.dir.y + oc.z * vector.dir.z);
+	c = oc.x * oc.x + oc.y * oc.y + oc.z * oc.z - (sphere.radius * sphere.radius);
 
-	// coefficients de l'équation
-	float a = dx*dx + dy*dy + dz*dz;
-	float ox_cx = o.x - c.x;
-	float oy_cy = o.y - c.y;
-	float oz_cz = o.z - c.z;
-	float b = 2 * (dx*ox_cx + dy*oy_cy + dz*oz_cz);
-	float c_term = ox_cx*ox_cx + oy_cy*oy_cy + oz_cz*oz_cz - sphere.radius * sphere.radius;
+	discriminant = b * b - 4 * a * c;
 
-	float delta = b*b - 4*a*c_term;
-
-	if (delta < 0)
-		return (0); // pas d’intersection
-
-	// on calcule les solutions
-	float t1 = (-b - sqrtf(delta)) / (2 * a);
-	float t2 = (-b + sqrtf(delta)) / (2 * a);
-
-	// si au moins une est >= 0, le vecteur touche la sphère
-	if (t1 >= 0 || t2 >= 0)
-		return (1);
-	return (0);
+	if (discriminant < 0.0f)
+		return (0); // pas de collision
+	else
+		return (1); // le rayon touche la sphère
 }
+
+
 
 int	get_pixel_color(float (**pixel_screen)[3], int i, t_program *program)
 {
@@ -242,12 +241,12 @@ int	get_pixel_color(float (**pixel_screen)[3], int i, t_program *program)
 	tmp.x = (*pixel_screen)[i][0];
 	tmp.y = (*pixel_screen)[i][1];
 	tmp.z = (*pixel_screen)[i][2];
-	t_vector	vector = create_vector(program->camera.camera.from, tmp);
+	t_vector	vector = create_vector(program->camera.camera.origin, tmp);
 
 	if (is_vector_hitting(vector, program->map))
 		res = 0xFF0000;
 	else
-		res = 0;
+		res = 0; 
 	return (res);
 }
 
@@ -257,8 +256,8 @@ void	get_image(float (**pixel_screen)[3], t_program *program)
 	// avec la fonction sub_vec()
 	
 	printf("FOV = %f\n", program->camera.fov);
-	print_point(program->camera.camera.from, "camera from");
-	print_point(program->camera.camera.vector_point, "camera dir");
+	print_point(program->camera.camera.origin, "camera from");
+	print_point(program->camera.camera.dir, "camera dir");
 	print_point(program->map.spheres->center, "sphere center");
 	printf("sphere radius = %f\n", program->map.spheres->radius);
 	(void)pixel_screen;
@@ -268,6 +267,7 @@ void	get_image(float (**pixel_screen)[3], t_program *program)
 		pixelput(program->mlx, i % RES_X, i / RES_X, get_pixel_color(pixel_screen, i, program));
 		i ++;
 	}
+	printf("test\n");
 	
 }
 
@@ -281,6 +281,7 @@ int	minirt(void)
 	init_program(program);
 	pixel_screen = NULL;
 	init_pixel_screen(&pixel_screen, *program);
+	print_pixel_screen(&pixel_screen);
 	// print_pixel_screen(pixel_screen);
 	// PROGRAMME PRINCIPAL
 	

@@ -6,7 +6,7 @@
 /*   By: adichou <adichou@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 21:27:34 by adichou           #+#    #+#             */
-/*   Updated: 2025/10/25 17:01:12 by adichou          ###   ########.fr       */
+/*   Updated: 2025/11/10 22:53:41 by adichou          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,10 @@ typedef	struct s_plan
 
 typedef struct s_vector
 {
-	t_point		vector_point;
-	t_point		from;
+	t_point		dir;
+	t_point		origin;
 }	t_vector;
+
 
 typedef struct s_sphere
 {
