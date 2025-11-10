@@ -6,7 +6,7 @@
 /*   By: adichou <adichou@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 20:58:41 by adichou           #+#    #+#             */
-/*   Updated: 2025/11/10 23:58:33 by adichou          ###   ########.fr       */
+/*   Updated: 2025/11/11 00:49:10 by adichou          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,7 +120,7 @@ void	init_program(t_program *program)
 {
 	program->x_size = RES_X;
 	program->y_size = RES_Y;
-	program->camera.fov = 1;
+	program->camera.fov = 0.3;
 	program->camera.camera = create_vector(create_point(10, 0, 10),
 							create_point(10, program->camera.fov, 10));
 	program->mlx.mlx = mlx_init();
@@ -162,37 +162,37 @@ void	print_point(t_point	point, char *str)
 	printf("%s Z = %f\n", str, point.z);
 }
 
-void	init_pixel_screen(float	(**pixel_screen)[3], t_program program)
+void init_pixel_screen(float (**pixel_screen)[3], t_program program)
 {
-	int		x_index;
-	int		y_index = 0;
-	int		index = 0;
+	int		x_index, y_index = 0, index = 0;
 	float	pixel_gap;
-	float	start[3];
+	float	start_x, start_z;
 
 	*pixel_screen = malloc(RES_X * RES_Y * sizeof(float[3]));
 	if (!*pixel_screen)
-		return ;
+		return;
 
-	pixel_gap = 1.0f / RES_X; // distance entre pixels (même pour X et Y)
-	start[0] = -0.5f; // centre horizontalement
-	start[1] = 1.0f;  // plan à y = 1
-	start[2] = -((float)RES_Y / (float)RES_X) / 2.0f; // centrer verticalement
+	pixel_gap = 1.0f / RES_X;
+
+	// Centrer le plan d'écran devant la caméra :
+	start_x = program.camera.camera.origin.x - 0.5f;  // centré sur X=10
+	start_z = program.camera.camera.origin.z - ((float)RES_Y / (float)RES_X) / 2.0f;
 
 	while (y_index < RES_Y)
 	{
 		x_index = 0;
 		while (x_index < RES_X)
 		{
-			(*pixel_screen)[index][0] = start[0] + (x_index * pixel_gap);
-			(*pixel_screen)[index][1] = program.camera.fov;
-			(*pixel_screen)[index][2] = start[2] + (y_index * pixel_gap);
+			(*pixel_screen)[index][0] = start_x + (x_index * pixel_gap);
+			(*pixel_screen)[index][1] = program.camera.camera.origin.y + program.camera.fov; // devant la caméra
+			(*pixel_screen)[index][2] = start_z + (y_index * pixel_gap);
 			x_index++;
 			index++;
 		}
 		y_index++;
 	}
 }
+
 
 
 void	print_pixel_screen(float	(**pixel_screen)[3])
