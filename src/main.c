@@ -6,11 +6,11 @@
 /*   By: adichou <adichou@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 20:58:41 by adichou           #+#    #+#             */
-/*   Updated: 2025/11/11 00:49:10 by adichou          ###   ########.fr       */
+/*   Updated: 2025/11/17 21:07:49 by adichou          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/fdf.h"
+#include "../include/minirt.h"
 
 
 t_vector	create_vector(t_point from, t_point to)
@@ -24,18 +24,6 @@ t_vector	create_vector(t_point from, t_point to)
 	res.dir = tmp;
 	res.origin = from;
 	return (res);
-}
-
-float	calcul_prod_scal(t_vector vec_1, t_vector vec_2)
-{
-	float	x_temp;
-	float	y_temp;
-	float	z_temp;
-
-	x_temp = vec_1.dir.x * vec_2.dir.x;
-	y_temp = vec_1.dir.y * vec_2.dir.y;
-	z_temp = vec_1.dir.z * vec_2.dir.z;
-	return (x_temp + y_temp + z_temp);
 }
 
 t_point	calcul_plan_norm(t_plan plan)
@@ -55,26 +43,6 @@ t_point	calcul_plan_norm(t_plan plan)
 	res.origin.y = 0;
 	res.origin.z = 0;
 	return (res.dir);
-}
-
-t_vector	sub_vec(t_vector v1, t_vector v2)
-{
-	t_vector	res;
-
-	res.dir.x = v1.dir.x - v2.dir.x;
-	res.dir.y = v1.dir.y - v2.dir.y;
-	res.dir.z = v1.dir.z - v2.dir.z;
-	return (res);
-}
-
-t_vector	mult_vec(float n, t_vector v1)
-{
-	t_vector	res;
-
-	res.dir.x = v1.dir.x * n;
-	res.dir.y = v1.dir.y * n;
-	res.dir.z = v1.dir.z * n;
-	return (res);
 }
 
 t_vector	bounce_plan(t_vector v, t_vector norm_plan)
@@ -104,31 +72,6 @@ t_point	create_point(float x, float y, float z)
 	res.y = y;
 	res.z = z;
 	return (res);
-}
-
-t_map	init_map(void)
-{
-	t_map	res;
-
-	res.spheres = malloc(3 * sizeof(t_sphere));
-	res.spheres[0].center = create_point(10, 20, 10);
-	res.spheres[0].radius = 10;
-	return res;
-}
-
-void	init_program(t_program *program)
-{
-	program->x_size = RES_X;
-	program->y_size = RES_Y;
-	program->camera.fov = 0.3;
-	program->camera.camera = create_vector(create_point(10, 0, 10),
-							create_point(10, program->camera.fov, 10));
-	program->mlx.mlx = mlx_init();
-	program->mlx.win =  mlx_new_window(program->mlx.mlx, RES_X, RES_Y, "MiniRT");
-	program->mlx.img = mlx_new_image(program->mlx.mlx, RES_X, RES_Y);
-	program->mlx.addr = mlx_get_data_addr(program->mlx.img, &(program->mlx.bpp),
-						&(program->mlx.line_length), &(program->mlx.endian));
-	program->map = init_map();
 }
 
 void	put_pixel(char *addr, int line_length, int bpp, int x, int y, int color)
@@ -193,8 +136,6 @@ void init_pixel_screen(float (**pixel_screen)[3], t_program program)
 	}
 }
 
-
-
 void	print_pixel_screen(float	(**pixel_screen)[3])
 {
 	printf("coin haut gauche, X = %f, Y = %f, Z = %f\n", (*pixel_screen)[0][0], (*pixel_screen)[0][1], (*pixel_screen)[0][2]);
@@ -203,9 +144,8 @@ void	print_pixel_screen(float	(**pixel_screen)[3])
 	printf("coin bas droit, X = %f, Y = %f, Z = %f\n", (*pixel_screen)[RES_X * RES_Y][0], (*pixel_screen)[RES_X * RES_Y][1], (*pixel_screen)[RES_X * RES_Y][2]);
 }
 
-int	is_vector_hitting(t_vector vector, t_map map)
+int	is_vector_hitting_sphere(t_vector vector, t_sphere sphere)
 {
-	t_sphere	sphere = map.spheres[0];
 	t_point		oc;
 	float		a, b, c;
 	float		discriminant;
@@ -228,6 +168,51 @@ int	is_vector_hitting(t_vector vector, t_map map)
 		return (1); // le rayon touche la sphère
 }
 
+float dot(t_vector a, t_vector b)
+{
+    return (a.dir.x * b.dir.x + a.dir.y * b.dir.y + a.dir.z * b.dir.z);
+}
+
+t_vector sub(t_vector a, t_vector b)
+{
+    t_vector r;
+    r.dir.x = a.dir.x - b.dir.x;
+    r.dir.y = a.dir.y - b.dir.y;
+    r.dir.z = a.dir.z - b.dir.z;
+    return r;
+}
+
+t_vector mul(t_vector v, float n)
+{
+    t_vector r = v;
+    r.dir.x *= n;
+    r.dir.y *= n;
+    r.dir.z *= n;
+    return r;
+}
+
+int is_vector_hitting_cylinder(t_vector ray, t_cylinder cyl)
+{
+    t_vector A = cyl.center; // axe du cylindre (normalisé)
+    t_vector OC;
+
+    OC = sub(ray, cyl.center);
+
+    // Projections perpendiculaires :
+    float d_dot_a = dot(ray, A);
+    float oc_dot_a = dot(OC, A);
+
+    t_vector D_perp = sub(ray, mul(A, d_dot_a));
+    t_vector OC_perp = sub(OC, mul(A, oc_dot_a));
+
+    float a = dot(D_perp, D_perp);
+    float b = 2.0f * dot(D_perp, OC_perp);
+    float c = dot(OC_perp, OC_perp) - cyl.radius * cyl.radius;
+
+    float discriminant = b*b - 4*a*c;
+
+    return (discriminant >= 0.0f);
+}
 
 
 int	get_pixel_color(float (**pixel_screen)[3], int i, t_program *program)
@@ -243,7 +228,8 @@ int	get_pixel_color(float (**pixel_screen)[3], int i, t_program *program)
 	tmp.z = (*pixel_screen)[i][2];
 	t_vector	vector = create_vector(program->camera.camera.origin, tmp);
 
-	if (is_vector_hitting(vector, program->map))
+	if (is_vector_hitting_sphere(vector, program->map.spheres[0]) ||
+		is_vector_hitting_cylinder(vector, program->map.cylinders[0]))
 		res = 0xFF0000;
 	else
 		res = 0; 

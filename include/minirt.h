@@ -1,15 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   fdf.h                                              :+:      :+:    :+:   */
+/*   minirt.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: adichou <adichou@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 21:27:34 by adichou           #+#    #+#             */
-/*   Updated: 2025/11/10 22:53:41 by adichou          ###   ########.fr       */
+/*   Updated: 2025/11/17 21:08:36 by adichou          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef MINIRT_H
+# define MINIRT_H
 #include "../lib/minilibx-linux/mlx.h"
 #include "../lib/LIBFT/libft.h"
 #include "X11/X.h"
@@ -43,7 +45,6 @@ typedef struct s_vector
 	t_point		dir;
 	t_point		origin;
 }	t_vector;
-
 
 typedef struct s_sphere
 {
@@ -89,3 +90,26 @@ typedef struct s_program
 	t_mlx		mlx;
 	t_map		map;
 }	t_program;
+
+t_vector		sub_vec(t_vector v1, t_vector v2);
+t_vector		mult_vec(float n, t_vector v1);
+float			calcul_prod_scal(t_vector vec_1, t_vector vec_2);
+t_map			init_map(void);
+void			init_program(t_program *program);
+t_vector		create_vector(t_point from, t_point to);
+t_point			calcul_plan_norm(t_plan plan);
+t_vector		bounce_plan(t_vector v, t_vector norm_plan);
+t_vector		get_vector(t_point a, t_point b);
+t_point			create_point(float x, float y, float z);
+t_map			init_map(void);
+void			put_pixel(char *addr, int line_length, int bpp, int x, int y, int color);
+void			pixelput(t_mlx mlx, int x, int y, int color);
+void			print_point(t_point	point, char *str);
+void			init_pixel_screen(float (**pixel_screen)[3], t_program program);
+void			print_pixel_screen(float	(**pixel_screen)[3]);
+int				is_vector_hitting_sphere(t_vector vector, t_sphere sphere);
+int				get_pixel_color(float (**pixel_screen)[3], int i, t_program *program);
+void			get_image(float (**pixel_screen)[3], t_program *program);
+int				minirt(void);
+
+#endif

@@ -6,7 +6,7 @@
 #    By: adichou <adichou@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/01/09 01:30:46 by adichou           #+#    #+#              #
-#    Updated: 2025/09/18 23:31:27 by adichou          ###   ########.fr        #
+#    Updated: 2025/11/17 18:54:05 by adichou          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,6 +19,8 @@ MLX_DIR = lib/minilibx-linux
 
 # Fichiers sources et objets
 SRC = $(SRC_DIR)/main.c \
+		$(SRC_DIR)/vec_calculs.c \
+		$(SRC_DIR)/init_functions.c	
 
 OBJ = $(SRC:.c=.o)
 
